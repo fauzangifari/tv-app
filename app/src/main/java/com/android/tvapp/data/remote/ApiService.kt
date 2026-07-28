@@ -11,5 +11,8 @@ interface ApiService {
     suspend fun getShows(@Query("page") page: Int = 0): List<ShowDto>
 
     @GET("shows/{id}")
-    suspend fun getShowDetail(@Path("id") id: Int): ShowDto
+    suspend fun getShowDetail(
+        @Path("id") id: Int,
+        @Query("embed[]") embed: List<String> = listOf("cast", "episodes")
+    ): ShowDto
 }
