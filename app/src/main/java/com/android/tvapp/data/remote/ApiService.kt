@@ -5,7 +5,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface TvMazeApi {
+interface ApiService {
 
     @GET("shows")
     suspend fun getShows(@Query("page") page: Int = 0): List<ShowDto>

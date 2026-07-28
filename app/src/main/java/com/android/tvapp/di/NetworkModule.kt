@@ -1,6 +1,6 @@
 package com.android.tvapp.di
 
-import com.android.tvapp.data.remote.TvMazeApi
+import com.android.tvapp.data.remote.ApiService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -30,5 +30,5 @@ object NetworkModule {
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
 
-    val tvMazeApi: TvMazeApi = retrofit.create(TvMazeApi::class.java)
+    val apiService: ApiService = retrofit.create(ApiService::class.java)
 }
