@@ -86,7 +86,7 @@ private fun ShowGrid(
 ) {
     val gridState = rememberLazyGridState()
 
-    val shouldLoadMore by remember {
+    val shouldLoadMore by remember(shows.size) {
         derivedStateOf {
             val lastVisibleIndex = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
             lastVisibleIndex >= shows.size - 4
