@@ -21,6 +21,9 @@ class ShowListViewModel(
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private var currentPage = 0
     private var endReached = false
     private var loadMoreJob: Job? = null
@@ -37,6 +40,18 @@ class ShowListViewModel(
             repository.getShows(currentPage)
                 .onSuccess { shows -> _uiState.value = UiState.Success(shows) }
                 .onFailure { error -> _uiState.value = UiState.Error(error.message ?: "Something went wrong") }
+        }
+    }
+
+    fun refresh() {
+        if (_isRefreshing.value) return
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            currentPage = 0
+            endReached = false
+            repository.getShows(currentPage)
+                .onSuccess { shows -> _uiState.value = UiState.Success(shows) }
+            _isRefreshing.value = false
         }
     }
 

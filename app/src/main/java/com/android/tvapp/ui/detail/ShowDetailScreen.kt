@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -34,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,6 +63,7 @@ import com.android.tvapp.ui.common.StateContent
 import com.android.tvapp.ui.common.UiState
 import com.android.tvapp.ui.common.htmlToAnnotatedString
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowDetailScreen(
     showId: Int,
@@ -68,6 +71,7 @@ fun ShowDetailScreen(
     onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(showId) {
@@ -95,7 +99,12 @@ fun ShowDetailScreen(
             modifier = Modifier.padding(paddingValues),
             errorTitle = "Couldn't load this show"
         ) { show ->
-            ShowDetailContent(show = show, onBackClick = onBackClick)
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = { viewModel.refresh(showId) }
+            ) {
+                ShowDetailContent(show = show, onBackClick = onBackClick)
+            }
         }
     }
 }

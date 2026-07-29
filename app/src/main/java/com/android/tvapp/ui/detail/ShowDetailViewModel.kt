@@ -17,12 +17,25 @@ class ShowDetailViewModel(
     private val _uiState = MutableStateFlow<UiState<Show>>(UiState.Loading)
     val uiState: StateFlow<UiState<Show>> = _uiState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     fun loadShowDetail(id: Int) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             repository.getShowDetail(id)
                 .onSuccess { show -> _uiState.value = UiState.Success(show) }
                 .onFailure { error -> _uiState.value = UiState.Error(error.message ?: "Something went wrong") }
+        }
+    }
+
+    fun refresh(id: Int) {
+        if (_isRefreshing.value) return
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            repository.getShowDetail(id)
+                .onSuccess { show -> _uiState.value = UiState.Success(show) }
+            _isRefreshing.value = false
         }
     }
 }
