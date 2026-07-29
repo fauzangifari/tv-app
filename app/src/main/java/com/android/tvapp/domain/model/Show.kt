@@ -3,6 +3,7 @@ package com.android.tvapp.domain.model
 data class Show(
     val id: Int,
     val title: String,
+    val url: String,
     val posterUrl: String?,
     val fullPosterUrl: String?,
     val rating: Double?,

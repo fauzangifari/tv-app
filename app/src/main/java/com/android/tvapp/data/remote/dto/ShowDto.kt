@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class ShowDto(
     val id: Int,
     val name: String,
+    val url: String? = null,
     val image: ImageDto? = null,
     val rating: RatingDto? = null,
     val summary: String? = null,
