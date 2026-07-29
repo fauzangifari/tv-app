@@ -70,3 +70,46 @@ sekarang tempatnya jelas satu file, gak perlu digali dari dalam
 repository. Setelah dipisah, saya compile ulang buat mastiin gak ada
 yang break dan importnya bersih (`ShowsRepositoryImpl` gak lagi
 import DTO/domain model yang gak dipakai langsung).
+
+## Entry 4 Bug `remember` tanpa key di infinite scroll pagination
+
+**Ditanya:** Saya baca-baca ulang kode pagination yang udah saya buat di
+`ShowListScreen.kt`, dan ngerasa ada yang aneh di bagian
+`remember { derivedStateOf { ... } }` — kayaknya `shows.size` di
+dalamnya gak bakal ke-update pas datanya nambah. Saya minta AI
+konfirmasi apa itu beneran bug atau cuma perasaan saya aja.
+
+**Dikasih:** AI nemuin bug di `ShowGrid` (`ShowListScreen.kt`), di
+logic infinite scroll yang AI sendiri yang nulis pas nambah fitur
+pagination:
+```kotlin
+val shouldLoadMore by remember {
+    derivedStateOf {
+        val lastVisibleIndex = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+        lastVisibleIndex >= shows.size - 4
+    }
+}
+```
+`remember { ... }` tanpa key cuma jalanin lambda-nya sekali di
+komposisi pertama, padahal `derivedStateOf` di dalamnya baca
+`shows.size` yang berubah tiap halaman pagination baru kemuat.
+Akibatnya closure-nya kebeku pakai `shows` dari 250 item awal
+selamanya — begitu user scroll lewat index ~246 sekali aja,
+`shouldLoadMore` jadi `true` terus tanpa pernah balik `false`,
+bikin app auto-fetch semua halaman berturut-turut walau user diam di
+satu posisi scroll.
+
+**Dilakukan:** Diterima dan langsung dibenerin: tambahin `shows.size`
+sebagai key ke `remember(shows.size) { derivedStateOf { ... } }` biar
+closure-nya dibuat ulang tiap daftarnya berubah.
+
+**Verifikasi sendiri:** Ini bug yang paling "berbahaya" yang saya
+tangkep sejauh ini karena lolos dari compile check DAN dari testing
+manual biasa (kelihatan jalan normal kalau scroll-nya gak pernah
+lewat index ~246, atau kalau cuma dicek sekali dua kali). Baru
+ketauan karena saya minta AI review ulang kodenya sendiri secara
+spesifik, bukan nunggu ketauan pas testing. Saya pastiin
+pemahamannya bener dengan telusuri manual: kenapa `remember` tanpa
+key gak re-run lambda-nya, dan kenapa itu bikin `shows` yang
+ke-capture di closure jadi permanen nunjuk ke list pertama. Setelah
+fix, saya compile ulang buat mastiin gak ada yang break.
